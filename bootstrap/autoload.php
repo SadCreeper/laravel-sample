@@ -16,6 +16,8 @@ define('LARAVEL_START', microtime(true));
 
 require __DIR__.'/../vendor/autoload.php';
 
+require __DIR__.'/helpers.php'; //根据不同环境切换数据库
+
 /*
 |--------------------------------------------------------------------------
 | Include The Compiled Class File
