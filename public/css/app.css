@@ -5781,6 +5781,11 @@ p {
   #logo:hover {
     color: #fff; }
 
+#logout {
+  cursor: default; }
+  #logout:hover {
+    background-color: transparent; }
+
 /* sidebar */
 aside section {
   padding: 10px 0;
