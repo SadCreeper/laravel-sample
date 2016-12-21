@@ -10,6 +10,8 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
+use Auth;
+
 class User extends Model implements AuthenticatableContract,
                                     AuthorizableContract,
                                     CanResetPasswordContract
@@ -73,11 +75,45 @@ class User extends Model implements AuthenticatableContract,
     {
         return $this->hasMany(Status::class);
     }
+    //模型间关系：一个用户可以拥有多个粉丝
+    public function followers()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
+    }
+    //模型间关系：一个用户可以关注多个人
+    public function followings()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'follower_id', 'user_id');
+    }
+    //关注
+    public function follow($user_ids)
+    {
+        if (!is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+        $this->followings()->sync($user_ids, false);
+    }
+    //取消关注
+    public function unfollow($user_ids)
+    {
+        if (!is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+        $this->followings()->detach($user_ids);
+    }
+    //检查是否关注
+    public function isFollowing($user_id)
+    {
+        return $this->followings->contains($user_id);
+    }
 
     //feed 获取数据
     public function feed()
     {
-        return $this->statuses()
-                    ->orderBy('created_at', 'desc');
+        $user_ids = Auth::user()->followings->pluck('id')->toArray();
+        array_push($user_ids, Auth::user()->id);
+        return Status::whereIn('user_id', $user_ids)
+                              ->with('user')
+                              ->orderBy('created_at', 'desc');
     }
 }
