@@ -67,4 +67,17 @@ class User extends Model implements AuthenticatableContract,
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "http://www.gravatar.com/avatar/$hash?s=$size";
     }
+
+    //模型间关系：一个用户拥有多个微博
+    public function statuses()
+    {
+        return $this->hasMany(Status::class);
+    }
+
+    //feed 获取数据
+    public function feed()
+    {
+        return $this->statuses()
+                    ->orderBy('created_at', 'desc');
+    }
 }
